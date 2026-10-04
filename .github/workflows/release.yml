@@ -1,0 +1,47 @@
+# Publishes the package to npm when a v* tag is pushed.
+#
+# **No stored token: Trusted Publishing.** npm trusts this workflow, in this
+# repository, through GitHub's OIDC token, so no npm token or one-time code is
+# needed, and the package carries provenance saying which commit built it.
+# The trust is registered once on the `saguin` package's settings on npm,
+# naming this repository and `release.yml`; renaming either breaks it.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # the OIDC token npm checks; nothing else is granted
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+
+      # Trusted Publishing needs npm 11.5.1 or later, newer than some Node
+      # releases bundle.
+      - name: an npm that can publish by OIDC
+        run: npm install --global npm@latest && npm --version
+
+      # **Checked before publishing, because a version on npm can never be
+      # published twice.**
+      - name: the tag is the package's version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg=$(node -p "require('./package.json').version")
+          echo "tag $tag, package.json $pkg"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::the tag and package.json disagree"
+            exit 1
+          fi
+
+      - run: npm publish --access public
