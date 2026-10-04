@@ -1,0 +1,59 @@
+# The broker the guided tour runs against, and a configuration you can
+# start yourself:
+#
+#     saguin -config examples/saguin.yaml
+#
+# Memory storage throughout, because the tour is a tour: nothing here
+# survives the process, which is exactly what `snapshot_dir: none` says.
+# For anything you mean to keep, an operator points the provider at
+# SQLite; RFC 0004 in the broker's repository has the rest.
+#
+# {port} and {ws_port} are filled in by the tour, which picks free ones.
+# Running this by hand, put numbers there.
+broker:
+  id: saguin-js-demo
+  log_level: warn
+  mqtt:
+    listen:
+      tcp:
+        address: 127.0.0.1:{port}
+      ws:
+        address: 127.0.0.1:{ws_port}
+  storage:
+    default: mem
+    default_retention_period: none
+    default_retention_bytes: none
+    providers:
+      - mem:
+          type: memory
+          snapshot_dir: none
+  retained:
+    storage: mem
+    retention_period: none
+
+channels:
+  # A schema registry is a `latest` channel and a convention: the schema
+  # text is the value and the topic is the identity.
+  - schemas:
+      type: latest
+      filter: schemas/#
+
+  # A replayable log. The braced level is a level with a fixed set of
+  # spellings, which is the shape the key composes against.
+  - readings:
+      type: append
+      filter: iot/+/{device,sensor}/#
+
+  # Current value per topic, delivered on subscribe.
+  - state:
+      type: latest
+      filter: iot/+/state/+
+
+  # Work. One attempt and a short lease, so that the tour can show a job
+  # being handed back and dead-lettered while you are still watching.
+  - tasks:
+      type: queue
+      filter: work/+/jobs/+
+      visibility_timeout: 2s
+      retry:
+        max_attempts: 1

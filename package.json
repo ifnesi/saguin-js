@@ -1,0 +1,57 @@
+{
+  "name": "saguin",
+  "version": "0.1.0",
+  "description": "A JavaScript client library for interacting with the Saguin MQTT 5 broker - a thin layer over MQTT.js",
+  "license": "Apache-2.0",
+  "author": "Italo Nesi",
+  "keywords": [
+    "mqtt",
+    "saguin",
+    "iot",
+    "queue",
+    "broker"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ifnesi/saguin-js.git"
+  },
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "mqtt": "^5.10.0"
+  },
+  "scripts": {
+    "test": "node --test --test-timeout=300000 tests/*.test.js"
+  },
+  "peerDependencies": {
+    "avsc": "^5.7.9",
+    "protobufjs": "^8.8.0"
+  },
+  "devDependencies": {
+    "avsc": "^5.7.9",
+    "protobufjs": "^8.8.0"
+  },
+  "peerDependenciesMeta": {
+    "avsc": {
+      "optional": true
+    },
+    "protobufjs": {
+      "optional": true
+    }
+  },
+  "homepage": "https://github.com/ifnesi/saguin-js#readme",
+  "bugs": {
+    "url": "https://github.com/ifnesi/saguin-js/issues"
+  }
+}
