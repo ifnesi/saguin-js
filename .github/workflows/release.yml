@@ -5,6 +5,11 @@
 # needed, and the package carries provenance saying which commit built it.
 # The trust is registered once on the `saguin` package's settings on npm,
 # naming this repository and `release.yml`; renaming either breaks it.
+#
+# **Staged, not published.** The trust allows `npm stage publish` only, so a
+# version this workflow uploads cannot be installed until a maintainer
+# approves it with 2FA, on npmjs.com (the package's Staged Packages tab) or
+# with `npm stage approve <id>`. A compromised workflow cannot ship a release.
 name: release
 
 on:
@@ -27,10 +32,11 @@ jobs:
           node-version: "24"
           registry-url: https://registry.npmjs.org
 
-      # Trusted Publishing needs npm 11.5.1 or later, newer than some Node
-      # releases bundle.
-      - name: an npm that can publish by OIDC
-        run: npm install --global npm@latest && npm --version
+      # Staged publishing needs npm 11.15.0 or later, newer than Node
+      # bundles. The 11 line rather than latest, so a new npm major (12 asks
+      # for a newer Node) cannot change this job between two releases.
+      - name: an npm that can stage by OIDC
+        run: npm install --global "npm@^11.15.0" && npm --version
 
       # **Checked before publishing, because a version on npm can never be
       # published twice.**
@@ -44,4 +50,4 @@ jobs:
             exit 1
           fi
 
-      - run: npm publish --access public
+      - run: npm stage publish --access public
